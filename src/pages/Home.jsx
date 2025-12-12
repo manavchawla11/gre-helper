@@ -1,10 +1,15 @@
 import { useEffect, useState } from 'react';
 import { getWordOfTheDay } from '../api/api';
+import { subscribeEmail } from '../api/subscribe';
 import RenderRTE from '../utils/renderRTE';
 
 export default function Home() {
   const [wotd, setWotd] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState('idle'); // idle | loading | success | error
+  const [error, setError] = useState('');
 
   useEffect(() => {
     getWordOfTheDay()
@@ -74,17 +79,29 @@ export default function Home() {
           Subscribe to receive the Word of the Day in your inbox.
         </p>
 
-        {/* MVP UI only (we'll wire it up once you decide backend approach) */}
+        {/* Subscription Form */}
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
-            alert('We’ll wire this in after the subscriber API is set up.');
+            setStatus('loading');
+            setError('');
+
+            try {
+              await subscribeEmail(email);
+              setStatus('success');
+              setEmail('');
+            } catch (err) {
+              setStatus('error');
+              setError(err.message || 'Something went wrong');
+            }
           }}
           style={{ display: 'flex', gap: 8, maxWidth: 420 }}
         >
           <input
             type="email"
             required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             style={{
               flex: 1,
@@ -92,24 +109,33 @@ export default function Home() {
               borderRadius: 10,
               border: '1px solid #ddd',
             }}
+            disabled={status === 'loading'}
           />
-          <button style={{ padding: '10px 14px', borderRadius: 10 }}>
-            Subscribe
+
+          <button
+            type="submit"
+            disabled={status === 'loading'}
+            style={{
+              padding: '10px 14px',
+              borderRadius: 10,
+              opacity: status === 'loading' ? 0.6 : 1,
+            }}
+          >
+            {status === 'loading' ? 'Subscribing…' : 'Subscribe'}
           </button>
         </form>
+        {status === 'success' && (
+          <p style={{ color: 'green', marginTop: 8 }}>
+            🎉 You’re subscribed! Check your inbox soon.
+          </p>
+        )}
+
+        {status === 'error' && (
+          <p style={{ color: 'red', marginTop: 8 }}>
+            Something went wrong. Please try again
+          </p>
+        )}
       </div>
     </div>
-  );
-}
-
-function renderRTE(val) {
-  // MVP: if you're using plain text in RTE, it'll still show as string.
-  if (!val) return null;
-  if (typeof val === 'string') return <p style={{ marginTop: 0 }}>{val}</p>;
-
-  // If JSON RTE is enabled, you’ll want Contentstack’s JSON RTE renderer later.
-  // For now, show a simple fallback:
-  return (
-    <pre style={{ whiteSpace: 'pre-wrap' }}>{JSON.stringify(val, null, 2)}</pre>
   );
 }
