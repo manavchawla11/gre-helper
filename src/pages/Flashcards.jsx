@@ -8,10 +8,8 @@ export default function Flashcards({ locale }) {
   const [words, setWords] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // grid flip state: uid -> boolean
-  const [flipped, setFlipped] = useState({});
+  const [flipped, setFlipped] = useState({}); // uid -> boolean
 
-  // single view state
   const [activeIndex, setActiveIndex] = useState(0);
   const [singleFlipped, setSingleFlipped] = useState(false);
 
@@ -20,7 +18,6 @@ export default function Flashcards({ locale }) {
     getVocabularyWords(difficulty, locale)
       .then((data) => {
         setWords(data || []);
-        // reset single view index when data changes
         setActiveIndex(0);
         setSingleFlipped(false);
       })
@@ -45,7 +42,6 @@ export default function Flashcards({ locale }) {
     if (!items.length) return;
 
     function onKeyDown(e) {
-      // prevent scroll on space
       if (e.key === ' ') e.preventDefault();
 
       if (e.key === 'ArrowLeft') goPrev();
@@ -60,72 +56,46 @@ export default function Flashcards({ locale }) {
 
   return (
     <div>
-      <h1 style={{ marginBottom: 6 }}>Flashcards</h1>
-      <p style={{ marginTop: 0, color: '#666' }}>
+      <h1 className="h1">Flashcards</h1>
+      <p className="sub">
         Toggle between all cards and a focused single-card practice mode.
       </p>
 
-      {/* Difficulty filter */}
-      <div
-        style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}
-      >
+      {/* Filters + View Toggle */}
+      <div className="filters">
         {['all', 'easy', 'medium', 'hard'].map((d) => (
           <button
             key={d}
             onClick={() => setDifficulty(d)}
-            style={{
-              padding: '8px 12px',
-              borderRadius: 999,
-              border: '1px solid #ddd',
-              fontWeight: difficulty === d ? 700 : 400,
-              background: difficulty === d ? '#f7f7f7' : 'white',
-            }}
+            className={`toggle ${difficulty === d ? 'active' : ''}`}
           >
             {d}
           </button>
         ))}
 
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-          <button
-            onClick={() => setView('grid')}
-            style={{
-              padding: '8px 12px',
-              borderRadius: 999,
-              border: '1px solid #ddd',
-              fontWeight: view === 'grid' ? 700 : 400,
-              background: view === 'grid' ? '#f7f7f7' : 'white',
-            }}
-          >
-            All cards
-          </button>
-          <button
-            onClick={() => setView('single')}
-            style={{
-              padding: '8px 12px',
-              borderRadius: 999,
-              border: '1px solid #ddd',
-              fontWeight: view === 'single' ? 700 : 400,
-              background: view === 'single' ? '#f7f7f7' : 'white',
-            }}
-          >
-            Single card
-          </button>
-        </div>
+        <div className="spacer" />
+
+        <button
+          onClick={() => setView('grid')}
+          className={`toggle ${view === 'grid' ? 'active' : ''}`}
+        >
+          All cards
+        </button>
+        <button
+          onClick={() => setView('single')}
+          className={`toggle ${view === 'single' ? 'active' : ''}`}
+        >
+          Single card
+        </button>
       </div>
 
       {loading ? (
-        <p>Loading…</p>
+        <p className="muted">Loading…</p>
       ) : items.length === 0 ? (
-        <p>No words found.</p>
+        <p className="muted">No words found.</p>
       ) : view === 'grid' ? (
         /* GRID VIEW */
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-            gap: 12,
-          }}
-        >
+        <div className="grid">
           {items.map((w) => {
             const isFlipped = !!flipped[w.uid];
             return (
@@ -142,53 +112,63 @@ export default function Flashcards({ locale }) {
                   <div
                     style={{ ...gridFlipStyles.face, ...gridFlipStyles.front }}
                   >
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                      }}
-                    >
-                      <span style={{ fontSize: 12, color: '#777' }}>
-                        {w.difficult}
-                      </span>
-                      <span style={{ fontSize: 12, color: '#777' }}>front</span>
+                    <div className="card card-pad" style={{ height: '100%' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginBottom: 8,
+                        }}
+                      >
+                        <span className="badge">{w.difficulty}</span>
+                        <span className="muted" style={{ fontSize: 12 }}>
+                          front
+                        </span>
+                      </div>
+                      <h2 style={{ margin: 0, fontSize: 22 }}>{w.title}</h2>
+                      <p className="muted" style={{ marginTop: 10 }}>
+                        Tap to reveal meaning.
+                      </p>
                     </div>
-                    <h2 style={{ marginBottom: 0 }}>{w.title}</h2>
                   </div>
 
                   {/* BACK */}
                   <div
                     style={{ ...gridFlipStyles.face, ...gridFlipStyles.back }}
                   >
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                      }}
-                    >
-                      <span style={{ fontSize: 12, color: '#777' }}>
-                        {w.difficult}
-                      </span>
-                      <span style={{ fontSize: 12, color: '#777' }}>back</span>
-                    </div>
-
-                    {/* Scrollable content area */}
-                    <div
-                      style={{
-                        marginTop: 8,
-                        maxHeight: 120, // adjust if you want
-                        overflowY: 'auto',
-                        paddingRight: 6, // space for scrollbar
-                      }}
-                    >
-                      <div>
-                        <strong>Meaning:</strong>
-                        <RenderRTE doc={w.meaning} />
+                    <div className="card card-pad" style={{ height: '100%' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <span className="badge">{w.difficulty}</span>
+                        <span className="muted" style={{ fontSize: 12 }}>
+                          back
+                        </span>
                       </div>
 
-                      <div style={{ marginTop: 8 }}>
-                        <strong>Example:</strong>
-                        <RenderRTE doc={w.example_usage} />
+                      {/* scrollable area */}
+                      <div
+                        style={{
+                          marginTop: 10,
+                          maxHeight: 135,
+                          overflowY: 'auto',
+                          paddingRight: 6,
+                        }}
+                      >
+                        <div>
+                          <strong>Meaning:</strong>
+                          <RenderRTE doc={w.meaning} />
+                        </div>
+
+                        <div style={{ marginTop: 10 }}>
+                          <strong>Example:</strong>
+                          <RenderRTE doc={w.example_usage} />
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -207,32 +187,18 @@ export default function Flashcards({ locale }) {
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: 12,
-              marginBottom: 10,
+              marginBottom: 12,
             }}
           >
-            <button
-              onClick={goPrev}
-              style={{
-                padding: '10px 14px',
-                borderRadius: 10,
-                border: '1px solid #ddd',
-              }}
-            >
+            <button onClick={goPrev} className="btn">
               ← Previous
             </button>
 
-            <div style={{ fontSize: 13, color: '#666' }}>
-              {items.length === 0 ? '0' : activeIndex + 1} / {items.length}
+            <div className="muted" style={{ fontSize: 13 }}>
+              {activeIndex + 1} / {items.length}
             </div>
 
-            <button
-              onClick={goNext}
-              style={{
-                padding: '10px 14px',
-                borderRadius: 10,
-                border: '1px solid #ddd',
-              }}
-            >
+            <button onClick={goNext} className="btn">
               Next →
             </button>
           </div>
@@ -246,108 +212,105 @@ export default function Flashcards({ locale }) {
             >
               {/* FRONT */}
               <div style={{ ...flipStyles.face, ...flipStyles.front }}>
-                {!activeWord ? (
-                  <p>No word selected.</p>
-                ) : (
-                  <>
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: 10,
-                      }}
-                    >
-                      <span style={{ fontSize: 12, color: '#777' }}>
-                        {activeWord.difficult}
-                      </span>
-                      <span style={{ fontSize: 12, color: '#777' }}>front</span>
-                    </div>
+                <div className="card card-pad-lg" style={{ height: '100%' }}>
+                  {!activeWord ? (
+                    <p className="muted">No word selected.</p>
+                  ) : (
+                    <>
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginBottom: 10,
+                        }}
+                      >
+                        <span className="badge">{activeWord.difficult}</span>
+                        <span className="muted" style={{ fontSize: 12 }}>
+                          front
+                        </span>
+                      </div>
 
-                    <h2 style={{ marginTop: 0, marginBottom: 8, fontSize: 34 }}>
-                      {activeWord.title}
-                    </h2>
+                      <h2
+                        style={{ margin: 0, fontSize: 40, letterSpacing: -0.6 }}
+                      >
+                        {activeWord.title}
+                      </h2>
 
-                    <p style={{ marginTop: 0, color: '#666' }}>
-                      Click to reveal meaning & example.
-                    </p>
-                  </>
-                )}
+                      <p className="muted" style={{ marginTop: 10 }}>
+                        Click to reveal meaning & example.
+                      </p>
+                    </>
+                  )}
+                </div>
               </div>
 
               {/* BACK */}
               <div style={{ ...flipStyles.face, ...flipStyles.back }}>
-                {!activeWord ? (
-                  <p>No word selected.</p>
-                ) : (
-                  <>
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        marginBottom: 10,
-                      }}
-                    >
-                      <span style={{ fontSize: 12, color: '#777' }}>
-                        {activeWord.difficult}
-                      </span>
-                      <span style={{ fontSize: 12, color: '#777' }}>back</span>
-                    </div>
+                <div className="card card-pad-lg" style={{ height: '100%' }}>
+                  {!activeWord ? (
+                    <p className="muted">No word selected.</p>
+                  ) : (
+                    <>
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          marginBottom: 10,
+                        }}
+                      >
+                        <span className="badge">{activeWord.difficult}</span>
+                        <span className="muted" style={{ fontSize: 12 }}>
+                          back
+                        </span>
+                      </div>
 
-                    <div style={{ marginTop: 8 }}>
-                      <strong>Meaning:</strong>
-                      <RenderRTE doc={activeWord.meaning} />
-                    </div>
+                      <div style={{ marginTop: 8 }}>
+                        <strong>Meaning:</strong>
+                        <RenderRTE doc={activeWord.meaning} />
+                      </div>
 
-                    <div style={{ marginTop: 12 }}>
-                      <strong>Example:</strong>
-                      <RenderRTE doc={activeWord.example_usage} />
-                    </div>
-                  </>
-                )}
+                      <div style={{ marginTop: 14 }}>
+                        <strong>Example:</strong>
+                        <RenderRTE doc={activeWord.example_usage} />
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>
 
-          {/* small actions */}
+          {/* bottom actions */}
           <div
             style={{
               display: 'flex',
-              gap: 8,
-              marginTop: 10,
+              alignItems: 'center',
               justifyContent: 'space-between',
+              gap: 12,
+              marginTop: 12,
+              flexWrap: 'wrap',
             }}
           >
-            <div>
-              <button
-                onClick={() => setSingleFlipped(false)}
-                style={{
-                  padding: '8px 12px',
-                  borderRadius: 10,
-                  border: '1px solid #ddd',
-                }}
-              >
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => setSingleFlipped(false)} className="btn">
                 Reset (front)
               </button>
 
               <button
                 onClick={() => {
-                  // pick a random card for practice
                   const idx = Math.floor(Math.random() * items.length);
                   setActiveIndex(idx);
                   setSingleFlipped(false);
                 }}
-                style={{
-                  padding: '8px 12px',
-                  borderRadius: 10,
-                  border: '1px solid #ddd',
-                }}
+                className="btn btn-primary"
               >
                 Random
               </button>
             </div>
-            <div style={{ fontSize: 16, color: '#888' }}>
+
+            <div className="muted" style={{ fontSize: 13 }}>
               ←/→ navigate • Space flip • Esc reset
             </div>
           </div>
@@ -358,66 +321,49 @@ export default function Flashcards({ locale }) {
 }
 
 const flipStyles = {
-  scene: {
-    perspective: 1200,
-  },
+  scene: { perspective: 1200 },
   card: (flipped) => ({
     position: 'relative',
-    border: '1px solid #eee',
-    borderRadius: 16,
-    padding: 0, // padding goes inside faces
+    borderRadius: 18,
+    padding: 0,
     cursor: 'pointer',
-    minHeight: 280,
+    minHeight: 320,
     background: 'transparent',
     transformStyle: 'preserve-3d',
-    transition: 'transform 840ms cubic-bezier(0.2, 0.8, 0.2, 1)',
+    transition: 'transform 1000ms cubic-bezier(0.4, 0.0, 0.2, 1)',
     transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
   }),
   face: {
     position: 'absolute',
     inset: 0,
-    borderRadius: 16,
-    background: 'white',
+    borderRadius: 18,
+    background: 'transparent',
     backfaceVisibility: 'hidden',
     WebkitBackfaceVisibility: 'hidden',
-    padding: 18,
     overflow: 'hidden',
   },
-  front: {
-    transform: 'rotateY(0deg)',
-  },
-  back: {
-    transform: 'rotateY(180deg)',
-  },
+  front: { transform: 'rotateY(0deg)' },
+  back: { transform: 'rotateY(180deg)' },
 };
 
 const gridFlipStyles = {
-  scene: {
-    perspective: 900,
-  },
+  scene: { perspective: 900 },
   card: (flipped) => ({
     position: 'relative',
-    minHeight: 200,
+    minHeight: 220,
     cursor: 'pointer',
     transformStyle: 'preserve-3d',
-    transition: 'transform 720ms cubic-bezier(0.2, 0.8, 0.2, 1)',
+    transition: 'transform 1000ms cubic-bezier(0.4, 0.0, 0.2, 1)',
     transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
   }),
   face: {
     position: 'absolute',
     inset: 0,
-    border: '1px solid #eee',
-    borderRadius: 12,
-    background: 'white',
-    padding: 14,
+    borderRadius: 18,
     backfaceVisibility: 'hidden',
     WebkitBackfaceVisibility: 'hidden',
     overflow: 'hidden',
   },
-  front: {
-    transform: 'rotateY(0deg)',
-  },
-  back: {
-    transform: 'rotateY(180deg)',
-  },
+  front: { transform: 'rotateY(0deg)' },
+  back: { transform: 'rotateY(180deg)' },
 };

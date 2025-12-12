@@ -1,17 +1,34 @@
 export default function LocaleSelect({ locale, locales, onChange }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-      <span style={{ fontSize: 14 }}>🌐</span>
+    <div
+      className="pill"
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 6,
+        padding: '6px 8px',
+      }}
+    >
+      <span
+        aria-hidden
+        style={{
+          fontSize: 14,
+          opacity: 0.75,
+        }}
+      >
+        🌐
+      </span>
+
       <select
+        className="select"
         value={locale}
         onChange={(e) => onChange(e.target.value)}
-        style={{
-          padding: '8px 10px',
-          borderRadius: 10,
-          border: '1px solid #ddd',
-          background: 'white',
-        }}
         aria-label="Select language"
+        style={{
+          border: 'none',
+          padding: '6px 6px',
+          background: 'transparent',
+        }}
       >
         {locales.map((l) => (
           <option key={l.code} value={l.code}>

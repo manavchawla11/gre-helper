@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { getWordOfTheDay } from '../api/api';
 import { subscribeEmail } from '../api/subscribe';
+import Toast from '../components/Toast';
 import RenderRTE from '../utils/renderRTE';
 
 export default function Home({ locale }) {
@@ -10,6 +11,7 @@ export default function Home({ locale }) {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState('idle'); // idle | loading | success | error
   const [error, setError] = useState('');
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     setLoading(true);
@@ -18,123 +20,118 @@ export default function Home({ locale }) {
       .finally(() => setLoading(false));
   }, [locale]);
 
-  // adjust this depending on your reference field uid
   const wordEntry = wotd?.word_ref?.[0];
-  console.log('wordEntry', wordEntry);
+
+  async function onSubscribe(e) {
+    e.preventDefault();
+    if (status === 'loading') return;
+
+    setStatus('loading');
+    setError('');
+
+    try {
+      await subscribeEmail(email.trim());
+      setStatus('success');
+      setEmail('');
+
+      setToast({
+        type: 'success',
+        title: 'Subscribed 🎉',
+        message: 'You’ll receive the Word of the Day in your inbox.',
+      });
+    } catch (err) {
+      setStatus('error');
+
+      setToast({
+        type: 'error',
+        title: 'Something went wrong',
+        message: err?.message || 'Please try again in a moment.',
+      });
+    }
+  }
 
   return (
     <div>
-      <h1 style={{ marginBottom: 6 }}>Word of the Day</h1>
-      <p style={{ marginTop: 0, color: '#666' }}>
-        Learn one word daily. Build vocab without burnout.
-      </p>
+      <h1 className="h1">Word of the Day</h1>
+      <p className="sub">Learn one word daily. Build vocab without burnout.</p>
 
       {loading ? (
-        <p>Loading…</p>
+        <p className="muted">Loading…</p>
       ) : !wordEntry ? (
-        <p>No Word of the Day set yet.</p>
+        <div className="card card-pad">
+          <p className="muted" style={{ margin: 0 }}>
+            No Word of the Day set yet.
+          </p>
+        </div>
       ) : (
-        <div
-          style={{ border: '1px solid #eee', borderRadius: 12, padding: 16 }}
-        >
+        <div className="card card-pad-lg">
           <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
             <h2 style={{ margin: 0 }}>{wordEntry.title}</h2>
-            <span
-              style={{
-                fontSize: 12,
-                padding: '4px 10px',
-                borderRadius: 999,
-                border: '1px solid #ddd',
-              }}
-            >
-              {wordEntry.difficulty}
-            </span>
+            <span className="badge">{wordEntry.difficulty}</span>
           </div>
 
-          <div style={{ height: 10 }} />
+          <div style={{ height: 12 }} />
 
           <div>
-            <h3 style={{ marginBottom: 6 }}>Meaning</h3>
-            <div>
-              <RenderRTE doc={wordEntry.meaning} />
-            </div>
+            <h3 style={{ marginBottom: 8 }}>Meaning</h3>
+            <RenderRTE doc={wordEntry.meaning} />
           </div>
 
-          <div style={{ height: 10 }} />
+          <div style={{ height: 14 }} />
 
           <div>
-            <h3 style={{ marginBottom: 6 }}>Example</h3>
+            <h3 style={{ marginBottom: 8 }}>Example</h3>
             <RenderRTE doc={wordEntry.example_usage} />
           </div>
         </div>
       )}
 
-      <div style={{ height: 28 }} />
+      <div className="hr" />
 
-      <div
-        id="subscribe"
-        style={{ borderTop: '1px solid #eee', paddingTop: 18 }}
-      >
+      <div id="subscribe">
         <h2 style={{ marginBottom: 6 }}>Get the word daily</h2>
-        <p style={{ marginTop: 0, color: '#666' }}>
+        <p className="sub" style={{ marginBottom: 12 }}>
           Subscribe to receive the Word of the Day in your inbox.
         </p>
 
-        {/* Subscription Form */}
-        <form
-          onSubmit={async (e) => {
-            e.preventDefault();
-            setStatus('loading');
-            setError('');
-
-            try {
-              await subscribeEmail(email);
-              setStatus('success');
-              setEmail('');
-            } catch (err) {
-              setStatus('error');
-              setError(err.message || 'Something went wrong');
-            }
-          }}
-          style={{ display: 'flex', gap: 8, maxWidth: 420 }}
-        >
+        <form className="formrow" onSubmit={onSubscribe}>
           <input
             type="email"
+            className="input"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
-            style={{
-              flex: 1,
-              padding: 10,
-              borderRadius: 10,
-              border: '1px solid #ddd',
-            }}
             disabled={status === 'loading'}
           />
 
           <button
             type="submit"
+            className={`btn ${status === 'loading' ? '' : 'btn-primary'}`}
             disabled={status === 'loading'}
-            style={{
-              padding: '10px 14px',
-              borderRadius: 10,
-              opacity: status === 'loading' ? 0.6 : 1,
-            }}
           >
             {status === 'loading' ? 'Subscribing…' : 'Subscribe'}
           </button>
         </form>
-        {status === 'success' && (
-          <p style={{ color: 'green', marginTop: 8 }}>
-            🎉 You’re subscribed! Check your inbox soon.
+
+        {/* {status === 'success' && (
+          <p style={{ marginTop: 10, color: 'rgba(180,255,210,.95)' }}>
+            🎉 You’re subscribed! Watch your inbox.
           </p>
         )}
 
         {status === 'error' && (
-          <p style={{ color: 'red', marginTop: 8 }}>
-            Something went wrong. Please try again
+          <p style={{ marginTop: 10, color: 'rgba(255,160,160,.95)' }}>
+            {error}
           </p>
+        )} */}
+        {toast && (
+          <Toast
+            type={toast.type}
+            title={toast.title}
+            message={toast.message}
+            onClose={() => setToast(null)}
+          />
         )}
       </div>
     </div>

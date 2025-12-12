@@ -19,39 +19,35 @@ export default function App() {
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: 16 }}>
-      <header style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-        <Link to="/" style={{ fontWeight: 700, textDecoration: 'none' }}>
-          GRE Verbal Helper
-        </Link>
-        <Link to="/flashcards">Flashcards</Link>
+      <div className="header">
+        <div className="nav">
+          <Link to="/" className="brand">
+            <span className="brand-badge" />
+            GRE Verbal Helper
+          </Link>
 
-        <div
-          style={{
-            marginLeft: 'auto',
-            display: 'flex',
-            gap: 8,
-            alignItems: 'center',
-          }}
-        >
-          {/* Language Switcher */}
-          <div style={{ display: 'flex', gap: 6 }}>
-            <LocaleSelect
-              locale={locale}
-              locales={SUPPORTED_LOCALES}
-              onChange={onChangeLocale}
-            />
+          <div className="navlinks">
+            <Link to="/flashcards">Flashcards</Link>
+            <a href="/#subscribe">Subscribe</a>
           </div>
 
-          <Link to="/#subscribe">Subscribe</Link>
+          <div className="spacer" />
+
+          <LocaleSelect
+            locale={locale}
+            locales={SUPPORTED_LOCALES}
+            onChange={onChangeLocale}
+          />
         </div>
-      </header>
+      </div>
 
-      <div style={{ height: 16 }} />
-
-      <Routes>
-        <Route path="/" element={<Home locale={locale} />} />
-        <Route path="/flashcards" element={<Flashcards locale={locale} />} />
-      </Routes>
+      <div className="container">
+        {/* routes here */}
+        <Routes>
+          <Route path="/" element={<Home locale={locale} />} />
+          <Route path="/flashcards" element={<Flashcards locale={locale} />} />
+        </Routes>
+      </div>
     </div>
   );
 }
