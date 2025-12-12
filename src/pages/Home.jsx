@@ -3,7 +3,7 @@ import { getWordOfTheDay } from '../api/api';
 import { subscribeEmail } from '../api/subscribe';
 import RenderRTE from '../utils/renderRTE';
 
-export default function Home() {
+export default function Home({ locale }) {
   const [wotd, setWotd] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -12,10 +12,11 @@ export default function Home() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    getWordOfTheDay()
+    setLoading(true);
+    getWordOfTheDay(locale)
       .then(setWotd)
       .finally(() => setLoading(false));
-  }, []);
+  }, [locale]);
 
   // adjust this depending on your reference field uid
   const wordEntry = wotd?.word_ref?.[0];

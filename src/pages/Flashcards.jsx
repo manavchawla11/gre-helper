@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { getVocabularyWords } from '../api/api';
 import RenderRTE from '../utils/renderRTE';
 
-export default function Flashcards() {
+export default function Flashcards({ locale }) {
   const [difficulty, setDifficulty] = useState('all');
   const [view, setView] = useState('grid'); // 'grid' | 'single'
   const [words, setWords] = useState([]);
@@ -17,7 +17,7 @@ export default function Flashcards() {
 
   useEffect(() => {
     setLoading(true);
-    getVocabularyWords(difficulty)
+    getVocabularyWords(difficulty, locale)
       .then((data) => {
         setWords(data || []);
         // reset single view index when data changes
@@ -25,7 +25,7 @@ export default function Flashcards() {
         setSingleFlipped(false);
       })
       .finally(() => setLoading(false));
-  }, [difficulty]);
+  }, [difficulty, locale]);
 
   const items = useMemo(() => words ?? [], [words]);
   const activeWord = items[activeIndex];
