@@ -5,14 +5,12 @@ export async function subscribeEmail(email) {
     throw new Error('Automate subscribe URL is not configured');
   }
 
-  const res = await fetch('/automate-subscribe', {
+  const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      email: email,
-    }),
+    body: JSON.stringify({ email }),
   });
 
   console.log('res', res);
