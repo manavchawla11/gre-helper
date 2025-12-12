@@ -225,7 +225,7 @@ export default function Flashcards({ locale }) {
                           marginBottom: 10,
                         }}
                       >
-                        <span className="badge">{activeWord.difficult}</span>
+                        <span className="badge">{activeWord.difficulty}</span>
                         <span className="muted" style={{ fontSize: 12 }}>
                           front
                         </span>
@@ -260,7 +260,7 @@ export default function Flashcards({ locale }) {
                           marginBottom: 10,
                         }}
                       >
-                        <span className="badge">{activeWord.difficult}</span>
+                        <span className="badge">{activeWord.difficulty}</span>
                         <span className="muted" style={{ fontSize: 12 }}>
                           back
                         </span>
